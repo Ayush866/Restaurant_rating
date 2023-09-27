@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>File Upload</title>
+</head>
+<body>
+    <h1>Upload a File for Batch Prediction</h1>
+    <form method="POST" enctype="multipart/form-data">
+        <input type="file" name="file" accept=".csv">
+        <button type="submit">Upload</button>
+    </form>
+
+    <!-- Add a download button -->
+    {% if download_link %}
+    <a href="{{ download_link }}">
+        <button>Download Predictions</button>
+    </a>
+    {% endif %}
+</body>
+</html>
