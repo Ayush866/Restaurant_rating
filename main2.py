@@ -13,6 +13,8 @@ app = Flask(__name__)
 
 @app.route('/', methods=['GET', 'POST'])
 def upload_file():
+    predictions_table = None  # Initialize predictions_table variable
+    download_link = None  # Initialize download_link variable
     if request.method == 'POST':
         # Get the uploaded file
         uploaded_file = request.files['file']
@@ -22,6 +24,7 @@ def upload_file():
             df.rename(columns={'listed_in(type)': 'type'}, inplace=True)
             df['type'] = df['type'].apply(lambda x: x.lower())
             df['approx_cost(for two people)'] = pd.to_numeric(df['approx_cost(for two people)'], errors='coerce')
+            df.drop("reviews_list", axis=1, inplace=True)
 
             logging.info(f"Creating model resolver object")
             model_resolver = ModelResolver(model_registry="saved_models")
@@ -29,29 +32,28 @@ def upload_file():
 
             logging.info(f"Loading transformer to transform dataset")
             transformer = load_object(file_path=model_resolver.get_latest_transformer_path())
-            input_feature_names = list(transformer.feature_names_in_)
             model = load_object(file_path=model_resolver.get_latest_model_path())
+            input_feature_names = list(transformer.feature_names_in_)
+
             input_arr = transformer.transform(df[input_feature_names])
 
             prediction = model.predict(input_arr)
-            # Apply data transformation using the loaded transformer
-            # transformed_data = transformer.transform(input_arr)
-
-            # Make predictions using the loaded model
-            # predictions = model.predict(transformed_data)
 
             # Create a DataFrame with predictions
             prediction_df = pd.DataFrame({'Predictions': prediction})
-            df=pd.concat([df,prediction_df],axis=1)
+            df = pd.concat([df, prediction_df], axis=1)
+
+            # Convert the DataFrame to an HTML table
+            predictions_table = df.to_html(classes='table table-bordered table-hover table-responsive')
+
             # Save predictions to a CSV file
-            prediction_csv = 'predictions.csv'
+            prediction_csv = 'prediction.csv'
             df.to_csv(prediction_csv, index=False)
 
-            # Return the file for download
-            return send_from_directory('.', prediction_csv, as_attachment=True)
+            # Set download_link to provide the download button
+            download_link = prediction_csv
 
-    return render_template('upload.html')
-
+    return render_template('upload.html', predictions_table=predictions_table, download_link=download_link)
 
 if __name__ == '__main__':
     app.run(debug=True)

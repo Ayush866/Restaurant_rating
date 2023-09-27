@@ -1,9 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>File Upload</title>
+    <!-- Your head content here -->
 </head>
 <body>
     <h1>Upload a File for Batch Prediction</h1>
@@ -12,11 +10,12 @@
         <button type="submit">Upload</button>
     </form>
 
-    <!-- Add a download button -->
-    {% if download_link %}
-    <a href="{{ download_link }}">
-        <button>Download Predictions</button>
-    </a>
+
+    <!-- Display the predictions table if available -->
+    {% if predictions_table %}
+    <div>
+        {{ predictions_table | safe }}
+    </div>
     {% endif %}
 </body>
 </html>
